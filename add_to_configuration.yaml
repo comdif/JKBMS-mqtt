@@ -1,0 +1,194 @@
+mqtt:
+  sensor:
+    - name: JK BMS Total Voltage
+      unique_id: jkbms_final_vtot
+      state_topic: homeassistant/sensor/jkbms/state
+      value_template: "{{ value_json.total_voltage | float(0) | round(3) }}"
+      unit_of_measurement: V
+      device_class: voltage
+      state_class: measurement
+    - name: JK BMS SOC
+      unique_id: jkbms_final_soc
+      state_topic: homeassistant/sensor/jkbms/state
+      value_template: "{{ value_json.soc | int(0) }}"
+      unit_of_measurement: %
+      device_class: battery
+      state_class: measurement
+    - name: JK BMS Current
+      unique_id: jkbms_final_curr
+      state_topic: homeassistant/sensor/jkbms/state
+      value_template: "{{ value_json.current | float(0) | round(3) }}"
+      unit_of_measurement: A
+      device_class: current
+      state_class: measurement
+    - name: JK BMS Cell 01
+      unique_id: jkbms_final_c01
+      state_topic: homeassistant/sensor/jkbms/state
+      value_template: "{{ value_json.cell_01 | float(0) | round(3) }}"
+      unit_of_measurement: V
+      device_class: voltage
+      state_class: measurement
+    - name: JK BMS Cell 02
+      unique_id: jkbms_final_c02
+      state_topic: homeassistant/sensor/jkbms/state
+      value_template: "{{ value_json.cell_02 | float(0) | round(3) }}"
+      unit_of_measurement: V
+      device_class: voltage
+      state_class: measurement
+    - name: JK BMS Cell 03
+      unique_id: jkbms_final_c03
+      state_topic: homeassistant/sensor/jkbms/state
+      value_template: "{{ value_json.cell_03 | float(0) | round(3) }}"
+      unit_of_measurement: V
+      device_class: voltage
+      state_class: measurement
+    - name: JK BMS Cell 04
+      unique_id: jkbms_final_c04
+      state_topic: homeassistant/sensor/jkbms/state
+      value_template: "{{ value_json.cell_04 | float(0) | round(3) }}"
+      unit_of_measurement: V
+      device_class: voltage
+      state_class: measurement
+    - name: JK BMS Cell 05
+      unique_id: jkbms_final_c05
+      state_topic: homeassistant/sensor/jkbms/state
+      value_template: "{{ value_json.cell_05 | float(0) | round(3) }}"
+      unit_of_measurement: V
+      device_class: voltage
+      state_class: measurement
+    - name: JK BMS Cell 06
+      unique_id: jkbms_final_c06
+      state_topic: homeassistant/sensor/jkbms/state
+      value_template: "{{ value_json.cell_06 | float(0) | round(3) }}"
+      unit_of_measurement: V
+      device_class: voltage
+      state_class: measurement
+    - name: JK BMS Cell 07
+      unique_id: jkbms_final_c07
+      state_topic: homeassistant/sensor/jkbms/state
+      value_template: "{{ value_json.cell_07 | float(0) | round(3) }}"
+      unit_of_measurement: V
+      device_class: voltage
+      state_class: measurement
+    - name: JK BMS Cell 08
+      unique_id: jkbms_final_c08
+      state_topic: homeassistant/sensor/jkbms/state
+      value_template: "{{ value_json.cell_08 | float(0) | round(3) }}"
+      unit_of_measurement: V
+      device_class: voltage
+      state_class: measurement
+    - name: JK BMS Cell 09
+      unique_id: jkbms_final_c09
+      state_topic: homeassistant/sensor/jkbms/state
+      value_template: "{{ value_json.cell_09 | float(0) | round(3) }}"
+      unit_of_measurement: V
+      device_class: voltage
+      state_class: measurement
+    - name: JK BMS Cell 10
+      unique_id: jkbms_final_c10
+      state_topic: homeassistant/sensor/jkbms/state
+      value_template: "{{ value_json.cell_10 | float(0) | round(3) }}"
+      unit_of_measurement: V
+      device_class: voltage
+      state_class: measurement
+    - name: JK BMS Cell 11
+      unique_id: jkbms_final_c11
+      state_topic: homeassistant/sensor/jkbms/state
+      value_template: "{{ value_json.cell_11 | float(0) | round(3) }}"
+      unit_of_measurement: V
+      device_class: voltage
+      state_class: measurement
+    - name: JK BMS Cell 12
+      unique_id: jkbms_final_c12
+      state_topic: homeassistant/sensor/jkbms/state
+      value_template: "{{ value_json.cell_12 | float(0) | round(3) }}"
+      unit_of_measurement: V
+      device_class: voltage
+      state_class: measurement
+    - name: JK BMS Cell 13
+      unique_id: jkbms_final_c13
+      state_topic: homeassistant/sensor/jkbms/state
+      value_template: "{{ value_json.cell_13 | float(0) | round(3) }}"
+      unit_of_measurement: V
+      device_class: voltage
+      state_class: measurement
+    - name: JK BMS Cell 14
+      unique_id: jkbms_final_c14
+      state_topic: homeassistant/sensor/jkbms/state
+      value_template: "{{ value_json.cell_14 | float(0) | round(3) }}"
+      unit_of_measurement: V
+      device_class: voltage
+      state_class: measurement
+    - name: JK BMS Cell 15
+      unique_id: jkbms_final_c15
+      state_topic: homeassistant/sensor/jkbms/state
+      value_template: "{{ value_json.cell_15 | float(0) | round(3) }}"
+      unit_of_measurement: V
+      device_class: voltage
+      state_class: measurement
+    - name: JK BMS Cell 16
+      unique_id: jkbms_final_c16
+      state_topic: homeassistant/sensor/jkbms/state
+      value_template: "{{ value_json.cell_16 | float(0) | round(3) }}"
+      unit_of_measurement: V
+      device_class: voltage
+      state_class: measurement
+
+template:
+  - sensor:
+      - name: JK BMS Minimum Cell Voltage
+        unique_id: jk_bms_minimum_cell_voltage
+        state: >
+          {{ [
+            states('sensor.jk_bms_cell_01') | float(0),
+            states('sensor.jk_bms_cell_02') | float(0),
+            states('sensor.jk_bms_cell_03') | float(0),
+            states('sensor.jk_bms_cell_04') | float(0),
+            states('sensor.jk_bms_cell_05') | float(0),
+            states('sensor.jk_bms_cell_06') | float(0),
+            states('sensor.jk_bms_cell_07') | float(0),
+            states('sensor.jk_bms_cell_08') | float(0),
+            states('sensor.jk_bms_cell_09') | float(0),
+            states('sensor.jk_bms_cell_10') | float(0),
+            states('sensor.jk_bms_cell_11') | float(0),
+            states('sensor.jk_bms_cell_12') | float(0),
+            states('sensor.jk_bms_cell_13') | float(0),
+            states('sensor.jk_bms_cell_14') | float(0),
+            states('sensor.jk_bms_cell_15') | float(0),
+            states('sensor.jk_bms_cell_16') | float(0)
+          ] | min | round(3) }}
+        unit_of_measurement: V
+        device_class: voltage
+        state_class: measurement
+      - name: JK BMS Maximum Cell Voltage
+        unique_id: jk_bms_maximum_cell_voltage
+        state: >
+          {{ [
+            states('sensor.jk_bms_cell_01') | float(0),
+            states('sensor.jk_bms_cell_02') | float(0),
+            states('sensor.jk_bms_cell_03') | float(0),
+            states('sensor.jk_bms_cell_04') | float(0),
+            states('sensor.jk_bms_cell_05') | float(0),
+            states('sensor.jk_bms_cell_06') | float(0),
+            states('sensor.jk_bms_cell_07') | float(0),
+            states('sensor.jk_bms_cell_08') | float(0),
+            states('sensor.jk_bms_cell_09') | float(0),
+            states('sensor.jk_bms_cell_10') | float(0),
+            states('sensor.jk_bms_cell_11') | float(0),
+            states('sensor.jk_bms_cell_12') | float(0),
+            states('sensor.jk_bms_cell_13') | float(0),
+            states('sensor.jk_bms_cell_14') | float(0),
+            states('sensor.jk_bms_cell_15') | float(0),
+            states('sensor.jk_bms_cell_16') | float(0)
+          ] | max | round(3) }}
+        unit_of_measurement: V
+        device_class: voltage
+        state_class: measurement
+      - name: JK BMS Cell Voltage Delta
+        unique_id: jk_bms_cell_voltage_delta
+        state: >
+          {% set c_min = states('sensor.jk_bms_minimum_cell_voltage') | float(0) %}
+          {% set c_max = states('sensor.jk_bms_maximum_cell_voltage') | float(0) %}
+          {{ ((c_max - c_min) * 1000) | round(0) }}
+        unit_of_measurement: mV
+        state_class: measurement
