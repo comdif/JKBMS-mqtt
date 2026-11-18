@@ -1,8 +1,7 @@
 #!/bin/bash
 
-### CUSTOM VARIABLES HERE /dev/ttyUSB0 or /dev/ttyUSB1 or /dev/ttyUSB0 ###
-MODPOLL="/usr/bin/mbpoll"
-SERIAL_PORT="/dev/ttyUSB0"
+MODPOLL="/usr/src/modpoll/arm-linux-gnueabihf/modpoll"
+SERIAL_PORT="/dev/serial/by-id/usb-FTDI_FT232R_USB_UART_A5069RR4-if00-port0"
 MQTT_BROKER="127.0.0.1"
 MQTT_PORT="1883"
 MQTT_TOPIC="homeassistant/sensor/jk_bms/state"
@@ -11,7 +10,7 @@ INTERVALLE=2
 lire_bms_16bit() {
     local registre=$1
     local compte=$2
-    $MODPOLL -m rtu -b 115200 -P none -o 2.00 -0 -t 4 -r "$registre" -c "$compte" -1 -q "$SERIAL_PORT" 2>/dev/null
+    $MODPOLL -m rtu -b 115200 -p none -t 4 -r "$registre" -c "$compte" -1 -0 -u "$SERIAL_PORT" 2>/dev/null
 }
 
 while true; do
@@ -19,15 +18,20 @@ while true; do
     B2=$(lire_bms_16bit 4752 26)
     B3=$(lire_bms_16bit 4772 2)
     B4=$(lire_bms_16bit 4746 1)
+    ####### PATCH18112026 #######
+    B5=$(lire_bms_16bit 4800 1)
+    B6=$(lire_bms_16bit 4802 1)
+    #############################
 
-    if [ ! -z "$B1" ] && [ ! -z "$B2" ] && [ ! -z "$B3" ] && [ ! -z "$B4" ]; then
+    ####### PATCH18112026 (ROLLBACK : décommenter la ligne suivante et supprimer le bloc PATCH) #######
+    # if [ ! -z "$B1" ] && [ ! -z "$B2" ] && [ ! -z "$B3" ] && [ ! -z "$B4" ]; then
+    if [ ! -z "$B1" ] && [ ! -z "$B2" ] && [ ! -z "$B3" ] && [ ! -z "$B4" ] && [ ! -z "$B5" ] && [ ! -z "$B6" ]; then
+    ###################################################################################################
         JSON_PAYLOAD=$(awk '
-        BEGIN {
-            printf "{";
-            c_max = 0;
-            c_min = 99;
-            idx_max = 1;
-            idx_min = 1;
+        BEGIN { 
+            printf "{" 
+            c_max = 0; c_min = 99; 
+            idx_max = 1; idx_min = 1; 
             cell_count = 0;
         }
         /^[[:space:]]*\[[0-9]+\]:/ {
@@ -36,7 +40,7 @@ while true; do
             val[clean_reg] = $2;
         }
         END {
-            # 1. Extraction and calculation of Individual Cells (4608 to 4623)
+            # 1. Extraction et calcul des Cellules Individuelles (4608 à 4623)
             for (i = 4608; i <= 4623; i++) {
                 if (i in val) {
                     cell_idx = i - 4607;
@@ -48,37 +52,42 @@ while true; do
                 }
             }
 
-            # 2. Reconstitution of 32-bit blocks
+            # 2. Reconstitution des blocs 32-bit
             v_voltage = (val[4752] * 65536) + val[4753];
-            v_power = (val[4754] * 65536) + val[4755];
+            v_power   = (val[4754] * 65536) + val[4755];
             v_current = (val[4756] * 65536) + val[4757];
             v_bal_cur = (val[4762] * 65536) + val[4763];
-            v_remain = (val[4764] * 65536) + val[4765];
+            v_remain  = (val[4764] * 65536) + val[4765];
             v_cyc_cap = (val[4770] * 65536) + val[4771];
 
-            # 32-bit signed integers management
+            # Gestion des entiers signés 32-bit
             if (v_current > 2147483647) v_current = v_current - 4294967296;
             if (v_power > 2147483647) v_power = v_power - 4294967296;
 
-            # 3. Extraction of 16-bit values
-            # AUTHENTIC EXTRACTION FROM ISOLATED READ OF REGISTER 4746
+            # 3. Extraction des valeurs 16-bit
+            # EXTRACTION AUTHENTIQUE DEPUIS LA LECTURE ISOLÉE DU REGISTRE 4746
             v_temp_mos = val[4746];
             if (v_temp_mos > 32767) v_temp_mos = v_temp_mos - 65536;
             v_temp_mos = v_temp_mos / 10;
-            v_temp_01 = val[4758] / 10;
-            v_temp_02 = val[4759] / 10;
-
+            v_temp_01  = val[4758] / 10;
+            v_temp_02  = val[4759] / 10;
             # Cycles count JKBMS
-            v_cycles = val[4769];
+            v_cycles   = val[4769];
+            # SOC from B3 bloc
+            v_soc      = val[4773];
 
-            # SOC from B3 block
-            v_soc = val[4773];
+            ####### PATCH18112026 #######
+            # Extraction des états Charge, Décharge et Équilibrage (registres 4800 et 4802)
+            v_chg_en = (int(val[4800]) % 256 > 0) ? "true" : "false";
+            v_dis_en = (int(val[4800] / 256) % 256 > 0) ? "true" : "false";
+            v_bal_en = (int(val[4802]) > 0) ? "true" : "false";
+            #############################
 
-            # Average V calculation
+            # Calcul Average V
             v_tot_fixed = v_voltage / 1000;
             v_avg_cell = (cell_count > 0) ? (v_tot_fixed / cell_count) : 0;
 
-            # 4. Final JSON
+            # 4. final JSON
             printf "\"total_voltage\":%.2f,", v_tot_fixed;
             printf "\"power\":%.1f,", v_power / 1000;
             printf "\"current\":%.2f,", v_current / 1000;
@@ -97,6 +106,11 @@ while true; do
             printf "\"min_cell_voltage\":%.3f,", c_min;
             printf "\"min_cell_number\":%d,", idx_min;
             printf "\"delta_cell_voltage\":%.3f,", c_max - c_min;
+            ####### PATCH18112026 #######
+            printf "\"balancing_enabled\":%s,", v_bal_en;
+            printf "\"charging_enabled\":%s,", v_chg_en;
+            printf "\"discharging_enabled\":%s,", v_dis_en;
+            #############################
             printf "\"bms_status\":\"online\"}"
         }
         ' <<EOF
@@ -104,15 +118,17 @@ $B1
 $B2
 $B3
 $B4
+####### PATCH18112026 #######
+$B5
+$B6
+#############################
 EOF
-        )
-
-        # Pub on local MQTT Broker
+)
+        # Pub on Broker MQTT local
         if [ ! -z "$JSON_PAYLOAD" ] && [[ "$JSON_PAYLOAD" == *"total_voltage"* ]]; then
             mosquitto_pub -h "$MQTT_BROKER" -p "$MQTT_PORT" -t "$MQTT_TOPIC" -m "$JSON_PAYLOAD" -r
             echo "MQTT Update -> $JSON_PAYLOAD"
         fi
     fi
-
     sleep "$INTERVALLE"
 done
