@@ -1,7 +1,6 @@
 #!/bin/bash
-
-MODPOLL="/usr/src/modpoll/arm-linux-gnueabihf/modpoll"
-SERIAL_PORT="/dev/serial/by-id/usb-FTDI_FT232R_USB_UART_A5069RR4-if00-port0"
+#Change for your USB/RS485 device address
+SERIAL_PORT="/dev/ttyUSB0"
 MQTT_BROKER="127.0.0.1"
 MQTT_PORT="1883"
 MQTT_TOPIC="homeassistant/sensor/jk_bms/state"
@@ -10,7 +9,7 @@ INTERVALLE=2
 lire_bms_16bit() {
     local registre=$1
     local compte=$2
-    $MODPOLL -m rtu -b 115200 -p none -t 4 -r "$registre" -c "$compte" -1 -0 -u "$SERIAL_PORT" 2>/dev/null
+    mbpoll -m rtu -b 115200 -P none -o 2.00 -0 -t 4 -r "$registre" -c "$compte" -1 -q "$SERIAL_PORT" 2>/dev/null
 }
 
 while true; do
