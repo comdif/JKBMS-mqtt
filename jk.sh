@@ -13,19 +13,8 @@ lire_bms_16bit() {
 }
 
 while true; do
-    B1=$(lire_bms_16bit 4608 16)
-    B2=$(lire_bms_16bit 4752 26)
-    B3=$(lire_bms_16bit 4772 2)
-    B4=$(lire_bms_16bit 4746 1)
-    ####### PATCH18112026 #######
-    B5=$(lire_bms_16bit 4800 1)
-    B6=$(lire_bms_16bit 4802 1)
-    #############################
-
-    ####### PATCH18112026 (ROLLBACK : décommenter la ligne suivante et supprimer le bloc PATCH) #######
-    # if [ ! -z "$B1" ] && [ ! -z "$B2" ] && [ ! -z "$B3" ] && [ ! -z "$B4" ]; then
-    if [ ! -z "$B1" ] && [ ! -z "$B2" ] && [ ! -z "$B3" ] && [ ! -z "$B4" ] && [ ! -z "$B5" ] && [ ! -z "$B6" ]; then
-    ###################################################################################################
+    B_TOTAL=$(lire_bms_16bit 4608 123)
+    if [ ! -z "$B_TOTAL" ]; then
         JSON_PAYLOAD=$(awk '
         BEGIN { 
             printf "{" 
@@ -39,7 +28,6 @@ while true; do
             val[clean_reg] = $2;
         }
         END {
-            # 1. Extraction et calcul des Cellules Individuelles (4608 à 4623)
             for (i = 4608; i <= 4623; i++) {
                 if (i in val) {
                     cell_idx = i - 4607;
@@ -51,36 +39,34 @@ while true; do
                 }
             }
 
-            # 2. Reconstitution des blocs 32-bit
-            v_voltage = (val[4752] * 65536) + val[4753];
-            v_power   = (val[4754] * 65536) + val[4755];
-            v_current = (val[4756] * 65536) + val[4757];
-            v_bal_cur = (val[4762] * 65536) + val[4763];
-            v_remain  = (val[4764] * 65536) + val[4765];
-            v_cyc_cap = (val[4770] * 65536) + val[4771];
-
-            # Gestion des entiers signés 32-bit
+            v_voltage = (val[4680] * 65536) + val[4681];
+            v_current = (val[4682] * 65536) + val[4683];
+            v_remain  = (val[4692] * 65536) + val[4693];
+            v_cyc_cap = (val[4698] * 65536) + val[4699];
             if (v_current > 2147483647) v_current = v_current - 4294967296;
-            if (v_power > 2147483647) v_power = v_power - 4294967296;
-
-            # 3. Extraction des valeurs 16-bit
-            # EXTRACTION AUTHENTIQUE DEPUIS LA LECTURE ISOLÉE DU REGISTRE 4746
-            v_temp_mos = val[4746];
+            v_power = (v_voltage / 1000) * (v_current / 1000) * 1000;
+            v_temp_mos = val[4686];
             if (v_temp_mos > 32767) v_temp_mos = v_temp_mos - 65536;
             v_temp_mos = v_temp_mos / 10;
-            v_temp_01  = val[4758] / 10;
-            v_temp_02  = val[4759] / 10;
-            # Cycles count JKBMS
-            v_cycles   = val[4769];
-            # SOC from B3 bloc
-            v_soc      = val[4773];
+            v_temp_01  = val[4687] / 10;
+            v_temp_02  = val[4687] / 10; # Copie sonde 1 par defaut si unique
+            v_cycles   = val[4697];
+            v_soc  = val[4691];
+            v_chg_en   = "true";
+            v_dis_en   = "true";
 
-            ####### PATCH18112026 #######
-            # Extraction des états Charge, Décharge et Équilibrage (registres 4800 et 4802)
-            v_chg_en = (int(val[4800]) % 256 > 0) ? "true" : "false";
-            v_dis_en = (int(val[4800] / 256) % 256 > 0) ? "true" : "false";
-            v_bal_en = (int(val[4802]) > 0) ? "true" : "false";
-            #############################
+            ####### PATCH25112026 #######
+            octet_fort = int(val[4690] / 256);
+            
+            if (octet_fort >= 240) {
+                v_bal_en = "true";
+                v_bal_cur = (int(val[4690] % 256)*10);
+            } else {
+                v_bal_en = "false";
+                v_bal_cur = 0;
+            }
+            ####### PATCH25112026 #######
+
 
             # Calcul Average V
             v_tot_fixed = v_voltage / 1000;
@@ -105,22 +91,13 @@ while true; do
             printf "\"min_cell_voltage\":%.3f,", c_min;
             printf "\"min_cell_number\":%d,", idx_min;
             printf "\"delta_cell_voltage\":%.3f,", c_max - c_min;
-            ####### PATCH18112026 #######
             printf "\"balancing_enabled\":%s,", v_bal_en;
             printf "\"charging_enabled\":%s,", v_chg_en;
             printf "\"discharging_enabled\":%s,", v_dis_en;
-            #############################
             printf "\"bms_status\":\"online\"}"
         }
         ' <<EOF
-$B1
-$B2
-$B3
-$B4
-####### PATCH18112026 #######
-$B5
-$B6
-#############################
+$B_TOTAL
 EOF
 )
         # Pub on Broker MQTT local
