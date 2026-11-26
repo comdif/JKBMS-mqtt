@@ -64,6 +64,11 @@ Here is the list of sensors published in the MQTT JSON payload:
 * `temp_01` — Temperature probe 1
 * `temp_02` — Temperature probe 2
 
+### BMS States & Controls / États & Contrôles du BMS
+* `balancing_enabled` — Cell balancing active status (`true`/`false`)
+* `charging_enabled` — Charge authorization status (`true`/`false`)
+* `discharging_enabled` — Discharge authorization status (`true`/`false`)
+
 ### Diagnostics & Statistics / Diagnostics & Statistiques
 * `cycle_count` — Number of charge/discharge cycles
 * `cycle_capacity` — Total accumulated capacity (Ah)
@@ -81,30 +86,46 @@ Here is the list of sensors published in the MQTT JSON payload:
 
 ```json
 {
-  "cell_01": 3.286,
-  "cell_02": 3.289,
-  ...
-  "cell_16": 3.287,
-  "total_voltage": 52.62,
-  "power": 337.6,
-  "current": -6.42,
-  "temp_mos": 18.7,
-  "temp_01": 19.7,
-  "temp_02": 19.2,
-  "cell_avg_voltage": 3.289,
-  "balance_current": 0.049,
-  "cap_remaining": 152.40,
-  "cycle_count": 11,
-  "cycle_capacity": 3725.2,
-  "soc": 49.0,
+  "cell_01": 3.343,
+  "cell_02": 3.343,
+  "cell_03": 3.344,
+  "cell_04": 3.344,
+  "cell_05": 3.344,
+  "cell_06": 3.343,
+  "cell_07": 3.347,
+  "cell_08": 3.345,
+  "cell_09": 3.344,
+  "cell_10": 3.345,
+  "cell_11": 3.345,
+  "cell_12": 3.345,
+  "cell_13": 3.344,
+  "cell_14": 3.344,
+  "cell_15": 3.344,
+  "cell_16": 3.343,
+  "total_voltage": 53.50,
+  "power": 26053.2,
+  "current": 486.99,
+  "temp_mos": 16.7,
+  "temp_01": 16.2,
+  "temp_02": 16.2,
+  "cell_avg_voltage": 3.344,
+  "balance_current": 0.000,
+  "cap_remaining": 195.66,
+  "cycle_count": 18,
+  "cycle_capacity": 5768.7,
+  "soc": 68.0,
   "cap_nominal": 314.00,
-  "max_cell_voltage": 3.290,
-  "max_cell_number": 8,
-  "min_cell_voltage": 3.286,
+  "max_cell_voltage": 3.347,
+  "max_cell_number": 7,
+  "min_cell_voltage": 3.343,
   "min_cell_number": 1,
   "delta_cell_voltage": 0.004,
+  "balancing_enabled": false,
+  "charging_enabled": true,
+  "discharging_enabled": true,
   "bms_status": "online"
 }
 ```
+
 
 ENJOY!
