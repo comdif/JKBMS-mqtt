@@ -126,6 +126,14 @@ Here is the list of sensors published in the MQTT JSON payload:
   "bms_status": "online"
 }
 ```
+## Diagnostic & Manual Testing
 
+Because the Modbus protocol for this BMS model lacks official documentation, the script retrieves data via a global raw dump of 123 registers rather than polling individual standard registers.
+
+You can validate serial communication and test the raw payload output manually using the following command (adjusting `/dev/ttyUSB0` to your specific serial port if necessary):
+
+```bash
+mbpoll -m rtu -b 115200 -P none -t 4 -r 4608 -c 123 -1 -0 /dev/ttyUSB0
+```
 
 ENJOY!
